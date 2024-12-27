@@ -1,0 +1,58 @@
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title></title>
+<style type="text/css">body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #333; /* Dark background */
+            color: #eee; /* Light text */
+        }
+        #doom-container {
+            width: 640px; /* Adjust as needed */
+            height: 400px; /* Adjust as needed */
+            margin: 20px auto;
+            border: 2px solid #555; /* Darker border */
+            background-color: #000; /* Black background for canvas */
+            overflow: hidden; /* Prevent scrollbars if canvas is larger */
+        }
+        #instructions{
+            text-align: center;
+        }
+        a{
+            color: lightblue;
+        }
+</style>
+<h1>Play Doom in your Browser (with js-dos)</h1>
+
+<div id="doom-container"> </div>
+
+<div id="instructions">
+<p>This uses <a href="https://js-dos.com/">js-dos</a> to emulate DOS and run Doom. You'll need to provide the WAD file.</p>
+
+<p><strong>Instructions:</strong></p>
+
+<ol>
+	<li>Obtain a Doom WAD file (e.g., `doom1.wad`, `doom2.wad`, or use <a href="https://freedoom.github.io/">Freedoom</a>).</li>
+	<li>Rename it to <code>doom.wad</code> and put it in the same folder as this HTML file.</li>
+	<li>Open this HTML file in your browser.</li>
+	<li>Press the "Start" button below to begin.</li>
+</ol>
+<button id="start-button">Start Doom</button></div>
+<script src="https://js-dos.com/v7/js-dos.js"></script><script>
+        const doomContainer = document.getElementById('doom-container');
+        const startButton = document.getElementById('start-button');
+        const instructions = document.getElementById('instructions');
+
+        startButton.addEventListener('click', () => {
+            instructions.style.display = 'none';
+            JsDos(doomContainer).ready(fs => {
+                fs.extract("doom.wad", "/doom/doom.wad").then(() => {
+                    fs.createFile("/autoexec.bat", "c:\ncd doom\ndoom -iwad doom.wad");
+                    return "DOOM.EXE";
+                }).catch(error => {
+                    console.error("Error loading WAD file:", error);
+                    alert("Error: Could not load doom.wad. Make sure it's in the same directory and named correctly.");
+                    instructions.style.display = 'block'; // Show instructions again
+                });
+            });
+        });
+    </script>

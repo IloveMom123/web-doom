@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+<head>
+<title>DooM WAD Viewer</title>
+<meta name="description" content="A HTML5/Javascript DOOM WAD viewer" />
+<meta name="keywords" content="DOOM, Heretic, WAD, iWAD, pWAD, HTML5,Javascript,viewer" />
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-29211605-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</head>
+<body>
+<script src="doom.js"></script>
+
+<div id='output' style='font-family: Courier'>Doom WAD Reader
+</div>
+<br>
+
+<input type='file' id='fileloader' style='font-family: Courier; font-size:10px'></input><br>
+
+<div id='description' style='font-family: Courier; font-size:10px'>
+Free shareware files can be obtained: <a href="http://www.dosgamers.com/dos/dos-games/doom-heretic-hexen">here</a>. This tool is currently optimised for the Doom shareware WAD.</div> <br>
+
+<button id='image_tab' onclick="toggleVis('images')">Images</button><button id='flat_tab' onclick="toggleVis('flats')">Floor/Ceiling Textures</button>
+<button id='textures_tab' onclick="toggleVis('textures')">Wall Textures</button>
+<button id='map_tab' onclick="toggleVis('maps')">Maps</button><button id='sounds_tab'  onclick="toggleVis('sounds')">Sound and Music</button><button id='misc_tab'  onclick="toggleVis('misc')">Misc</button><br>
+
+
+<div id='images' style='position:absolute; top:150px; border:solid 1px black; visibility:hidden;font-family: Courier; font-size:10px'>
+<input type='checkbox' id='background'>Black Background</input><br>
+<br>
+<table style='table-layout:fixed'>
+
+<tr>
+<td>
+Misc Images: <br>
+Game Sprites: <br>
+UI Elements: <br>
+</td>
+<td>
+<select id='miscImageSelector'></select><br>
+<select id='enemyImageSelector'></select><br>
+<select id='uiImageSelector'></select><br>
+</td>
+
+<td>
+
+Source Data:<br>
+<canvas id='imageViewer'style='border:solid 1px black' width=1px height=1px></canvas>
+<canvas id='intermediate' style='visibility:hidden; display:none'></canvas></td>
+</tr>
+<tr>
+<td>Zoom:<br></td>
+<td>
+<select id='zoom' onchange=zoomImage()>
+<option value='1'>1x</option>
+<option value='2'>2x</option>
+<option value='4'>4x</option>
+<option value='8'>8x</option>
+<option value='16'>16x</option>
+</select>
+</td>
+<td>
+Output:<br>
+<img id='finalImage'></img></td>
+</tr>
+</table>
+
+
+<br>
+Game Palette:<br>
+<canvas id='playpal'style='border:solid 1px black'></canvas>
+</div>
+
+
+<div id='flats' style='position:absolute; top:150px; border:solid 1px black; visibility:hidden;font-family: Courier; font-size:10px'>
+Floor/Ceiling Texture: <select id='flatSelector'></select><br>
+Source Data:<br>
+<canvas id='flatViewer'style='border:solid 1px black' width=1px height=1px></canvas><canvas id='intermediateFlat' style='visibility:hidden; display:none'></canvas><br>
+Tiled Output:<br>
+<img id='finalFlats'></img>
+</div>
+
+<div id='textures' style='position:absolute; top:150px; border:solid 1px black; visibility:hidden;font-family: Courier; font-size:10px'>
+Wall Texture: 
+<select id='textureSelector'></select><br>
+
+<canvas id='textureViewer'style='border:solid 1px black' width=1px height=1px></canvas><canvas id='intermediateTexture' style='visibility:hidden; display:none'></canvas><br>
+Zoom: <select id='zoomTexture' onchange=zoomTexture()>
+<option value='1'>1x</option>
+<option value='2'>2x</option>
+<option value='4'>4x</option>
+<option value='8'>8x</option>
+<option value='16'>16x</option>
+
+
+</select><br>
+
+
+ Output:<br>
+<img id='finalTexture'></img>
+</div>
+
+
+<div id='maps' style='position:absolute; top:150px; border:solid 1px black; visibility:hidden;font-family: Courier; font-size:10px'>
+Key:<br>
+<table>
+<tr><td style='background-color:white'>&nbsp;&nbsp;</td><td>Player Spawns</td></tr>
+<tr><td style='background-color:purple'>&nbsp;&nbsp;</td><td>Enemies</td></tr>
+<tr><td style='background-color:blue'>&nbsp;&nbsp;</td><td>Weapons</td></tr>
+<tr><td style='background-color:red'>&nbsp;&nbsp;</td><td>Ammo</td></tr>
+<tr><td style='background-color:orange'>&nbsp;&nbsp;</td><td>Pickups</td></tr>
+<tr><td style='background-color:green'>&nbsp;&nbsp;</td><td>Other</td></tr>
+</table>
+<select id='mapSelector'></select><br>
+Resized:<br>
+<img id='finalMap'></img><br>
+<canvas id='intermediateMap' style='visibility:hidden; display:none'width=1px height=1px></canvas>
+Original:<br>
+<canvas id='mapViewer' width=1px height=1px></canvas>
+
+</div>
+
+<div id='sounds'  style='position:absolute; top:150px; border:solid 1px black; visibility:hidden;font-family: Courier; font-size:10px'>
+<select id='sfxSelector'></select> <button id='playSFX' onclick='playSFX()'>Play</button><br> 
+
+</div>
+
+<div id='misc' style='position:absolute; top:150px; border:solid 1px black; visibility:hidden;font-family: Courier; font-size:10px'>
+Text on Exiting Game:<br><div id='endoom' style='font-family: Courier'></div>
+</div>
+
+
+
+<script type="text/javascript">
+document.getElementById('fileloader').addEventListener('change', LoadFile, false);
+document.getElementById('miscImageSelector').addEventListener('change', changeImage, false);
+document.getElementById('enemyImageSelector').addEventListener('change', changeImage, false);
+document.getElementById('uiImageSelector').addEventListener('change', changeImage, false);
+document.getElementById('flatSelector').addEventListener('change', changeFlat, false);
+document.getElementById('textureSelector').addEventListener('change', changeTexture, false);
+document.getElementById('mapSelector').addEventListener('change', changeMap, false);
+document.getElementById('sfxSelector').addEventListener('change', changeSFX, false);
+
+
+
+</script>
+
+</body>
+</html>
